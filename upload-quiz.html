@@ -93,10 +93,18 @@
         
         <div class="progress-info" id="progress-info">
             <div id="progress-text">正在解析...</div>
+            <div id="save-options" style="display:none; margin-top: 20px;">
+                <input type="text" id="library-name" placeholder="给题库起个名字（默认为文件名）" 
+                    style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 15px; font-size: 14px;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-success" id="save-and-quiz-btn" style="flex: 1;">💾 保存并答题</button>
+                    <button class="btn btn-primary" id="quiz-only-btn" style="flex: 1;">▶️ 仅答题</button>
+                </div>
+            </div>
         </div>
         
-        <button class="btn btn-secondary" onclick="window.location.href='index.html'" style="margin-top: 20px;">
-            返回默认题库
+        <button class="btn btn-secondary" onclick="window.location.href='library.html'" style="margin-top: 20px;">
+            📚 题库管理
         </button>
     </div>
 
@@ -169,11 +177,13 @@
         // Global variables
         let quizData = [];
         let currentQuestionIndex = 0;
+        let currentFileName = '';
         let userState = {
             answers: {},
             results: {},
         };
 
+        const LIBRARY_KEY = 'quizLibraries';
         const getOptionLabel = (index) => String.fromCharCode(65 + index);
 
         // Upload functionality
@@ -238,13 +248,12 @@
                         return;
                     }
                     
-                    progressText.textContent = `解析成功！共 ${quizData.length} 道题`;
+                    currentFileName = file.name.replace(/\.(xls|xlsx)$/i, '');
+                    progressText.textContent = `✅ 解析成功！共 ${quizData.length} 道题`;
                     
-                    setTimeout(() => {
-                        uploadPanel.classList.add('hidden');
-                        quizContainer.classList.add('show');
-                        initQuiz();
-                    }, 1000);
+                    // Show save options
+                    document.getElementById('save-options').style.display = 'block';
+                    document.getElementById('library-name').value = currentFileName;
                     
                 } catch (error) {
                     alert('文件解析失败：' + error.message);
@@ -293,6 +302,44 @@
             });
 
             return result;
+        }
+
+        // Library management
+        function saveToLibrary() {
+            const libraryName = document.getElementById('library-name').value.trim() || currentFileName;
+            
+            const libraries = JSON.parse(localStorage.getItem(LIBRARY_KEY) || '[]');
+            
+            const newLibrary = {
+                name: libraryName,
+                questionCount: quizData.length,
+                uploadTime: new Date().toISOString(),
+                questions: quizData
+            };
+            
+            libraries.push(newLibrary);
+            localStorage.setItem(LIBRARY_KEY, JSON.stringify(libraries));
+            
+            return libraryName;
+        }
+
+        // Button handlers
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('save-and-quiz-btn')?.addEventListener('click', () => {
+                const libName = saveToLibrary();
+                alert(`题库"${libName}"已保存到题库管理！`);
+                startQuiz();
+            });
+
+            document.getElementById('quiz-only-btn')?.addEventListener('click', () => {
+                startQuiz();
+            });
+        });
+
+        function startQuiz() {
+            uploadPanel.classList.add('hidden');
+            quizContainer.classList.add('show');
+            initQuiz();
         }
 
         // Quiz functionality
