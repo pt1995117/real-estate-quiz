@@ -39,12 +39,29 @@
             display: none;
         }
         
+        .upload-panel.hidden {
+            display: none;
+        }
+        
         .quiz-container {
             display: none;
+            flex-direction: column;
+            height: 100vh;
         }
         
         .quiz-container.show {
             display: flex;
+        }
+        
+        .quiz-container .main-container {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .quiz-container .action-bar {
+            position: relative;
+            left: 0;
+            bottom: auto;
         }
         
         .progress-info {
@@ -224,7 +241,7 @@
                     progressText.textContent = `解析成功！共 ${quizData.length} 道题`;
                     
                     setTimeout(() => {
-                        uploadPanel.style.display = 'none';
+                        uploadPanel.classList.add('hidden');
                         quizContainer.classList.add('show');
                         initQuiz();
                     }, 1000);
