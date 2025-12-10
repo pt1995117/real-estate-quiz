@@ -17,7 +17,16 @@
             <div class="info-item">已答：<span id="answered-count">0</span></div>
             <div class="info-item">得分：<span id="current-score" style="display:none">0</span></div>
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="position: relative;">
+                <button class="btn btn-secondary" id="switch-library-btn" style="background: #fff; border: 2px solid #1a73e8; color: #1a73e8;">
+                    🔄 切换题库
+                </button>
+                <div id="library-dropdown" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 5px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 250px; max-height: 400px; overflow-y: auto;">
+                    <div style="padding: 10px 15px; border-bottom: 1px solid #eee; font-weight: bold; color: #666; font-size: 13px;">选择题库</div>
+                    <div id="library-list" style="padding: 5px 0;"></div>
+                </div>
+            </div>
             <button class="btn btn-secondary" onclick="window.location.href='library.html'" style="background: #fff; border: 2px solid #1a73e8; color: #1a73e8;">📚 题库管理</button>
             <button id="submit-exam-btn" class="btn btn-success">交卷查看成绩</button>
         </div>

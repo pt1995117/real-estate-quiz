@@ -16,8 +16,17 @@
             <div class="info-item">总题数：<span id="total-count">0</span></div>
             <div class="info-item">已答：<span id="answered-count">0</span></div>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-secondary" onclick="window.location.href='library.html'">返回题库</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="position: relative;">
+                <button class="btn btn-secondary" id="switch-library-btn" style="background: #fff; border: 2px solid #1a73e8; color: #1a73e8;">
+                    🔄 切换题库
+                </button>
+                <div id="library-dropdown" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 5px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 250px; max-height: 400px; overflow-y: auto;">
+                    <div style="padding: 10px 15px; border-bottom: 1px solid #eee; font-weight: bold; color: #666; font-size: 13px;">选择题库</div>
+                    <div id="library-list" style="padding: 5px 0;"></div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="window.location.href='library.html'">📚 题库管理</button>
             <button id="submit-exam-btn" class="btn btn-success">交卷查看成绩</button>
         </div>
     </header>
@@ -94,8 +103,70 @@
                 return;
             }
 
+            initLibraryDropdown();
             initQuiz();
         });
+
+        function initLibraryDropdown() {
+            const switchBtn = document.getElementById('switch-library-btn');
+            const dropdown = document.getElementById('library-dropdown');
+            const libraryList = document.getElementById('library-list');
+
+            // Load all libraries
+            const libraries = JSON.parse(localStorage.getItem('quizLibraries') || '[]');
+            const currentLibrary = JSON.parse(sessionStorage.getItem('selectedLibrary') || '{}');
+
+            // Add default library
+            const defaultItem = document.createElement('div');
+            defaultItem.style.cssText = 'padding: 12px 15px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f0f0f0;';
+            defaultItem.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 3px;">🏠 房产知识题库（精选）</div>
+                <div style="font-size: 12px; color: #999;">370 道题</div>
+            `;
+            defaultItem.onmouseenter = () => defaultItem.style.background = '#f5f5f5';
+            defaultItem.onmouseleave = () => defaultItem.style.background = '';
+            defaultItem.onclick = () => {
+                window.location.href = 'index.html';
+            };
+            libraryList.appendChild(defaultItem);
+
+            // Add custom libraries
+            libraries.forEach((lib, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 12px 15px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f0f0f0;';
+                if (lib.name === currentLibrary.name) {
+                    item.style.background = '#e8f0fe';
+                }
+                item.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 3px;">📁 ${lib.name}</div>
+                    <div style="font-size: 12px; color: #999;">${lib.questionCount} 道题</div>
+                `;
+                item.onmouseenter = () => {
+                    if (lib.name !== currentLibrary.name) item.style.background = '#f5f5f5';
+                };
+                item.onmouseleave = () => {
+                    if (lib.name !== currentLibrary.name) item.style.background = '';
+                };
+                item.onclick = () => {
+                    sessionStorage.setItem('selectedLibrary', JSON.stringify(lib));
+                    window.location.reload();
+                };
+                libraryList.appendChild(item);
+            });
+
+            // Toggle dropdown
+            switchBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!switchBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
 
         function initQuiz() {
             document.getElementById('total-count').textContent = quizData.length;

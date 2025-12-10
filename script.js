@@ -18,6 +18,7 @@ function initApp() {
     document.getElementById('total-count').textContent = quizData.length;
     renderQuestionGrid();
     loadQuestion(0);
+    initLibraryDropdown();
 
     // 2. Event Listeners
     document.getElementById('prev-btn').addEventListener('click', () => navigate(-1));
@@ -263,4 +264,57 @@ function finishExam() {
     
     // Refresh grid to show all new results
     updateAllGridStatus();
+}
+
+function initLibraryDropdown() {
+    const switchBtn = document.getElementById('switch-library-btn');
+    const dropdown = document.getElementById('library-dropdown');
+    const libraryList = document.getElementById('library-list');
+
+    if (!switchBtn || !dropdown || !libraryList) return;
+
+    // Load all libraries
+    const libraries = JSON.parse(localStorage.getItem('quizLibraries') || '[]');
+    libraryList.innerHTML = '';
+
+    // Add default library (highlighted as current)
+    const defaultItem = document.createElement('div');
+    defaultItem.style.cssText = 'padding: 12px 15px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f0f0f0; background: #e8f0fe;';
+    defaultItem.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 3px;">🏠 房产知识题库（精选）</div>
+        <div style="font-size: 12px; color: #999;">370 道题</div>
+    `;
+    defaultItem.onmouseenter = () => defaultItem.style.background = '#d2e3fc';
+    defaultItem.onmouseleave = () => defaultItem.style.background = '#e8f0fe';
+    libraryList.appendChild(defaultItem);
+
+    // Add custom libraries
+    libraries.forEach((lib) => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding: 12px 15px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f0f0f0;';
+        item.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 3px;">📁 ${lib.name}</div>
+            <div style="font-size: 12px; color: #999;">${lib.questionCount} 道题</div>
+        `;
+        item.onmouseenter = () => item.style.background = '#f5f5f5';
+        item.onmouseleave = () => item.style.background = '';
+        item.onclick = () => {
+            sessionStorage.setItem('selectedLibrary', JSON.stringify(lib));
+            window.location.href = 'quiz.html';
+        };
+        libraryList.appendChild(item);
+    });
+
+    // Toggle dropdown
+    switchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!switchBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
 }
